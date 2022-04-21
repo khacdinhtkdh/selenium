@@ -8,18 +8,12 @@ from tkinter import filedialog
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from unidecode import unidecode
 import random
 import re
-import sys
 from subprocess import CREATE_NO_WINDOW
 from threading import Thread
 
-sys.coinit_flags = 2
-from pywinauto.keyboard import send_keys
 
 link = "https://demo.computervision.com.vn/"
 link_cmt = "https://demo.computervision.com.vn/ocr?type=CMND/CCCD"
@@ -46,8 +40,6 @@ zip_code = dict()
 pattern = "^.*(?=.{8,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$"
 
 
-# driver.execute_script("window.open('url_of_page_to_get', 'new_window')")
-
 def func_select_folder():
     global folder_image
     folder_image = filedialog.askdirectory()
@@ -60,9 +52,6 @@ def get_info(get_type):
     options.add_argument('headless')
     # options.add_argument('window-size=0x0')
 
-    get_link = ""
-    mydict = dict()
-    dict_txt = dict()
     if get_type == 'CMT':
         get_link = link_cmt
         mydict = mydict_cmt
@@ -218,9 +207,8 @@ class GetInfo(Thread):
         get_info(self.type)
 
 
-
 root = Tk()
-
 app = Main(root)
+root.title('Image to Text')
 # root.geometry("400x300")
 root.mainloop()
