@@ -185,12 +185,12 @@ class Main(object):
     def __init__(self, master):
         self.master = master
         button1 = Button(master, text='Select folder', command=func_select_folder)
-        button1.grid(row=1, column=0, pady=10)
+        button1.grid(row=1, column=0, pady=10, padx=10)
         button2 = Button(master, text='Get CMT Info', command=lambda x="CMT": self.get_info_image(x))
-        button2.grid(row=1, column=1, pady=10)
+        button2.grid(row=1, column=1, pady=10, padx=10)
         button2 = Button(master, text='Get GPLX Info', command=lambda x="GPLX": self.get_info_image(x))
-        button2.grid(row=1, column=2, pady=10)
-        self.progress = tkinter.ttk.Progressbar(master, length=300, orient=HORIZONTAL, mode='indeterminate')
+        button2.grid(row=1, column=2, pady=10, padx=10)
+        self.progress = tkinter.ttk.Progressbar(master, length=280, orient=HORIZONTAL, mode='indeterminate')
         # self.progress.grid(row=2, column=0, columnspan=3, padx=5, pady=10)
 
     def monitor_convert(self, thread):
