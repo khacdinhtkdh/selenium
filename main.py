@@ -2,6 +2,7 @@ import os
 import shutil
 import string
 import time
+import tkinter.ttk
 from tkinter import *
 from tkinter import filedialog
 from selenium import webdriver
@@ -15,6 +16,7 @@ import random
 import re
 import sys
 from subprocess import CREATE_NO_WINDOW
+from threading import Thread
 
 sys.coinit_flags = 2
 from pywinauto.keyboard import send_keys
@@ -31,12 +33,12 @@ image_add = 'https://www.hoclaixetphcm.com/wp-content/uploads/2016/05/giay-phep-
 image_2 = 'https://daotaolaixeoto.com.vn/Images/images/gplx-ghep.jpg'
 
 mydict_cmt = {"So the:": "CMT", "Ho ten:": "FULL NAME", "Ngay sinh:": "Birthday", "Thuong tru:": "ADDRESS"}
-mydict_gplx = {"So the:": "CMT", "Ho ten:": "FULL NAME", "Ngay sinh:": "Birthday", "Thuong tru:": "ADDRESS"}
+mydict_gplx = {"So the:": "GPLX", "Ho ten:": "FULL NAME", "Ngay sinh:": "Birthday", "Noi cu tru:": "ADDRESS"}
 
-dict_txt_cmt = {'FULL NAME': '', 'Birthday': '', 'PHONE': '', 'EMAIL': '', 'PASS PAYPAL': '', 'ADDRESS': '', 'ZIPCODE': '',
-            'CMT': '', 'VISA': ''}
-dict_txt_gplx = {'FULL NAME': '', 'Birthday': '', 'PHONE': '', 'EMAIL': '', 'PASS PAYPAL': '', 'ADDRESS': '', 'ZIPCODE': '',
-            'GPLX': '', 'VISA': ''}
+dict_txt_cmt = {'FULL NAME': '', 'Birthday': '', 'PHONE': '', 'EMAIL': '', 'PASS PAYPAL': '',
+                'ADDRESS': '', 'ZIPCODE': '', 'CMT': '', 'VISA': ''}
+dict_txt_gplx = {'FULL NAME': '', 'Birthday': '', 'PHONE': '', 'EMAIL': '', 'PASS PAYPAL': '',
+                 'ADDRESS': '', 'ZIPCODE': '', 'GPLX': '', 'VISA': ''}
 
 res_info_final = ""
 folder_image = ""
@@ -65,7 +67,7 @@ def get_info(get_type):
         get_link = link_cmt
         mydict = mydict_cmt
         dict_txt = dict_txt_cmt
-    elif get_type == 'GPLX':
+    else:
         get_link = link_gplx
         mydict = mydict_gplx
         dict_txt = dict_txt_gplx
@@ -154,6 +156,8 @@ def get_info(get_type):
             tinh = tinh.replace('tp ', '')
         if '-' in tinh:
             tinh = tinh.split('-')[0]
+        if 't ' in tinh:
+            tinh = tinh.replace('t ', '')
         print('get:' + tinh)
         for key in zip_code.keys():
             if tinh in key:
@@ -174,25 +178,49 @@ def get_info(get_type):
         my_file.write(res_info_final)
         my_file.close()
 
-        listbox.insert(END, 'Get info {} completed\n'.format(list_image_dir.split('\\')[-1]))
-        try:
-            delete_image = upload_e.find_element(By.TAG_NAME, 'button')
-            delete_image.click()
-        except:
-            print("can not find button delete")
-    print('done')
     driver.quit()
 
 
+class Main(object):
+    def __init__(self, master):
+        self.master = master
+        button1 = Button(master, text='Select folder', command=func_select_folder)
+        button1.grid(row=1, column=0, pady=10)
+        button2 = Button(master, text='Get CMT Info', command=lambda x="CMT": self.get_info_image(x))
+        button2.grid(row=1, column=1, pady=10)
+        button2 = Button(master, text='Get GPLX Info', command=lambda x="GPLX": self.get_info_image(x))
+        button2.grid(row=1, column=2, pady=10)
+        self.progress = tkinter.ttk.Progressbar(master, length=300, orient=HORIZONTAL, mode='indeterminate')
+        # self.progress.grid(row=2, column=0, columnspan=3, padx=5, pady=10)
+
+    def monitor_convert(self, thread):
+        if thread.is_alive():
+            self.master.after(100, lambda: self.monitor_convert(thread))
+        else:
+            self.progress.stop()
+            self.progress.grid_forget()
+            print("done")
+
+    def get_info_image(self, type_get):
+        get_info_thread = GetInfo(type_get)
+        get_info_thread.start()
+        self.monitor_convert(get_info_thread)
+        self.progress.grid(row=2, column=0, columnspan=3, padx=5, pady=10)
+        self.progress.start()
+
+
+class GetInfo(Thread):
+    def __init__(self, type_get):
+        super().__init__()
+        self.type = type_get
+
+    def run(self):
+        get_info(self.type)
+
+
+
 root = Tk()
-root.geometry("400x300")
-root.resizable(True, True)
-listbox = Listbox(root, width=60)
-listbox.grid(row=0, column=0, columnspan=3, padx=15)
-button1 = Button(root, text='Select folder', command=func_select_folder)
-button1.grid(row=1, column=0, pady=10)
-button2 = Button(root, text='Get CMT Info', command=lambda x="CMT": get_info(x))
-button2.grid(row=1, column=1, pady=10)
-button2 = Button(root, text='Get GPLX Info', command=lambda x="GPLX": get_info(x))
-button2.grid(row=1, column=2, pady=10)
+
+app = Main(root)
+# root.geometry("400x300")
 root.mainloop()
